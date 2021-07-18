@@ -32,7 +32,7 @@ from tensorflow.keras import Sequential
 from tensorflow.keras.layers import Dense, Embedding, GlobalAveragePooling1D
 from tensorflow.keras.layers.experimental.preprocessing import TextVectorization
 from tensorflow.keras.callbacks import TensorBoard
-from tensorflow.python.keras.layers import MaxPooling1D, LSTM
+from tensorflow.python.keras.layers import MaxPooling1D, LSTM, Bidirectional
 from tqdm import tqdm
 
 tqdm.pandas()
@@ -118,10 +118,10 @@ y_train.shape
 x_train.shape
 filter_length = 500
 num_classes = 8
-x_train = x_train.reshape(-1, 1, 353)
-# print(y_train)
-y_train = y_train.reshape(-1, 1, 353)
-x_test = x_test.reshape(-1, 1, 89)
+# x_train = x_train.reshape(1,-1, 353)
+# # print(y_train)
+# y_train = y_train.reshape(1, -1, 353)
+# x_test = x_test.reshape(-1, 1, 89)
 print(x_train.shape)
 print(y_train.shape)
 embedding_layer = tf.keras.layers.Embedding(1000, 5)
@@ -148,9 +148,9 @@ vectorize_layer.adapt(sentences)
 embedding_dim=100
 model = Sequential([
     Embedding(vocab_size,embedding_dim, name="embedding"),
-    Conv1D(filter_length, 3, padding='same', activation='relu', strides=1),
+    Conv1D(filter_length, 3, padding='valid', activation='relu', strides=1),
     MaxPooling1D(),
-    LSTM(64),
+    LSTM(64, input_shape=(1,64)),
     Dense(512,activation='relu'),
     Dropout(0.5),
     Dense(num_classes, activation='softmax'),
@@ -164,7 +164,7 @@ model.compile(optimizer='adam',
 model.fit(
     x_train,
     y_train,
-    epochs=12,
+    epochs=15,
     batch_size=8,
     callbacks=[tensorboard])
 model.summary()
